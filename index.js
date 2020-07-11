@@ -67,14 +67,15 @@ async function closeBrowser() {
 
   await page.keyboard.press('Enter');
 
-  // 登入成功或失敗
-  const value = await Promise.race([
-    startLoginDialog,
+  // 登入成功 - element，跳轉頁面，可以取得頁面上的送出按鈕
+  // 登入失敗 - message，跳出 alert，提前結束動作，關閉瀏覽器
+  const elementOrMessage = await Promise.race([
     page.waitFor('body > app-root > app-record > button'),
+    startLoginDialog,
   ]);
 
-  if (value === '帳號或密碼錯誤！') {
-    console.log(value);
+  if (elementOrMessage === '帳號或密碼錯誤！') {
+    console.log(elementOrMessage);
 
     console.log('登入失敗，關閉瀏覽器');
 
@@ -83,7 +84,7 @@ async function closeBrowser() {
     return;
   }
 
-  console.log('跳轉頁面');
+  console.log('已跳轉頁面');
 
   console.log('按下送出按鈕');
 
