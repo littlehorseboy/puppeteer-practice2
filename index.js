@@ -51,15 +51,39 @@ async function closeBrowser() {
   await accountInput.type('123');
 
   const passwordInput = await page.$('body > app-root > app-login > div > div > form > div:nth-child(2) > input');
-  await passwordInput.type('32');
+  await passwordInput.type('321');
 
   console.log('輸入完畢，按下 Enter');
 
+  // 監聽登入失敗的 alert
+  const loginDialog = () => new Promise((resolve) => {
+    page.on('dialog', async (dialog) => {
+      await dialog.dismiss();
+      resolve(dialog.message());
+    });
+  });
+
+  const startLoginDialog = loginDialog();
+
   await page.keyboard.press('Enter');
 
-  console.log('跳轉頁面');
+  // 登入成功或失敗
+  const value = await Promise.race([
+    startLoginDialog,
+    page.waitFor('body > app-root > app-record > button'),
+  ]);
 
-  await page.waitFor('body > app-root > app-record > button');
+  if (value === '帳號或密碼錯誤！') {
+    console.log(value);
+
+    console.log('登入失敗，關閉瀏覽器');
+
+    await closeBrowser();
+
+    return;
+  }
+
+  console.log('跳轉頁面');
 
   console.log('按下送出按鈕');
 
