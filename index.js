@@ -53,7 +53,7 @@ async function closeBrowser() {
   const passwordInput = await page.$('body > app-root > app-login > div > div > form > div:nth-child(2) > input');
   await passwordInput.type('321');
 
-  console.log('輸入完畢，按下 Enter');
+  console.log('輸入完畢');
 
   // 監聽登入失敗的 alert
   const loginDialog = () => new Promise((resolve) => {
@@ -63,12 +63,15 @@ async function closeBrowser() {
     });
   });
 
+  // 執行監聽，用新變數來等待 Promise {<pending>} 的狀態改變
   const startLoginDialog = loginDialog();
+
+  console.log('按下 Enter');
 
   await page.keyboard.press('Enter');
 
-  // 登入成功 - element，跳轉頁面，可以取得頁面上的送出按鈕
-  // 登入失敗 - message，跳出 alert，提前結束動作，關閉瀏覽器
+  // 登入成功 - 跳轉頁面，可以取得頁面上的送出按鈕
+  // 登入失敗 - 跳出 alert 訊息框，提前結束動作，關閉瀏覽器
   const elementOrMessage = await Promise.race([
     page.waitFor('body > app-root > app-record > button'),
     startLoginDialog,
